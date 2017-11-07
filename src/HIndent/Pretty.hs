@@ -696,6 +696,11 @@ exp (Con _ q) = case q of
                   Qual _ _ (Symbol _ _) -> parens (pretty q)
                   UnQual _ (Symbol _ _) -> parens (pretty q)
                   _ -> pretty q
+exp (Proc _ p e) = mightSwingExp (do
+    write "proc "
+    pretty p
+    write " ->"
+    ) e
 
 exp x@XTag{} = pretty' x
 exp x@XETag{} = pretty' x
@@ -705,7 +710,6 @@ exp x@XChildTag{} = pretty' x
 exp x@CorePragma{} = pretty' x
 exp x@SCCPragma{} = pretty' x
 exp x@GenPragma{} = pretty' x
-exp x@Proc{} = pretty' x
 exp x@LeftArrApp{} = pretty' x
 exp x@RightArrApp{} = pretty' x
 exp x@LeftArrHighApp{} = pretty' x

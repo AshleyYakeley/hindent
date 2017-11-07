@@ -846,6 +846,32 @@ main = putStrLn "Hello, World!"
 {- This is another random comment. -}
 ```
 
+# Arrow syntax
+
+Simple arrow
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+fun x =
+  proc x -> do
+    y <- a -< x
+    returnA -< y
+```
+
+Arrow inside let
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+fun2 x = let
+  arr1 =
+    proc x -> do
+      y <- a -< x
+      returnA -< y
+  in arr1 x
+```
+
 # Regression tests
 
 jml Adds trailing whitespace when wrapping #221
