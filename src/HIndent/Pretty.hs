@@ -911,12 +911,14 @@ classHead ctx dhead fundeps decls = shortHead `ifFitsOnOneLineOrElse` longHead
               (unless (null (fromMaybe [] decls)) (write " where"))))
     longHead = do
       depend (write "class ") (withCtx ctx $ pretty dhead)
-      newline
-      indentedBlock $ do
-        unless (null fundeps) $ do
-          depend (write "| ") (prefixedLined ", " $ map pretty fundeps)
+      if null fundeps
+        then unless (null (fromMaybe [] decls)) (write " where")
+        else do
           newline
-        unless (null (fromMaybe [] decls)) (write "where")
+          indentedBlock $ do
+            depend (write "| ") (prefixedLined ", " $ map pretty fundeps)
+            newline
+            unless (null (fromMaybe [] decls)) (write "where")
 
 instance Pretty TypeEqn where
   prettyInternal (TypeEqn _ in_ out_) = do

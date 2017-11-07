@@ -1344,13 +1344,11 @@ sophie-h Regression: Breaks basic type class code by inserting "|" #459
 ```haskell
 -- https://github.com/commercialhaskell/hindent/issues/459
 class Class1 a =>
-      Class2 a
-  where
+      Class2 a where
   f :: a -> Int
 
 class (Eq a, Show a) =>
-      Num a
-  where
+      Num a where
   (+), (-), (*) :: a -> a -> a
   negate :: a -> a
   abs, signum :: a -> a
