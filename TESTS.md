@@ -350,8 +350,8 @@ type family Id a = r | r -> a
 Binding implicit parameters
 
 ```haskell
-f =
-  let ?x = 42
+f = let
+  ?x = 42
   in f
 ```
 
@@ -513,8 +513,7 @@ g x =
   where
     foo =
       case x of
-        _ -> do
-          launchMissiles
+        _ -> do launchMissiles
       where
         y = 2
 ```
@@ -522,13 +521,13 @@ g x =
 Let inside a `where`
 
 ``` haskell
-g x =
-  let x = 1
+g x = let
+  x = 1
   in x
   where
-    foo =
-      let y = 2
-          z = 3
+    foo = let
+      y = 2
+      z = 3
       in y
 ```
 
@@ -1196,10 +1195,10 @@ NorfairKing Do as left-hand side of an infix operation #296
 
 ```haskell
 -- https://github.com/commercialhaskell/hindent/issues/296
-block =
-  do ds <- inBraces $ inWhiteSpace declarations
-     return $ Block ds
-     <?> "block"
+block = do
+  ds <- inBraces $ inWhiteSpace declarations
+  return $ Block ds
+  <?> "block"
 ```
 
 NorfairKing Hindent linebreaks after very short names if the total line length goes over 80 #405
@@ -1405,36 +1404,38 @@ A complex, slow-to-print decl
 quasiQuotes =
   [ ( ''[]
     , \(typeVariable:_) _automaticPrinter ->
-        (let presentVar = varE (presentVarName typeVariable)
-         in lamE
-              [varP (presentVarName typeVariable)]
-              [|(let typeString = "[" ++ fst $(presentVar) ++ "]"
-                 in ( typeString
-                    , \xs ->
-                        case fst $(presentVar) of
-                          "GHC.Types.Char" ->
-                            ChoicePresentation
-                              "String"
-                              [ ( "String"
-                                , StringPresentation
-                                    "String"
-                                    (concatMap
-                                       getCh
-                                       (map (snd $(presentVar)) xs)))
-                              , ( "List of characters"
-                                , ListPresentation
-                                    typeString
-                                    (map (snd $(presentVar)) xs))
-                              ]
-                            where getCh (CharPresentation "GHC.Types.Char" ch) =
-                                    ch
-                                  getCh (ChoicePresentation _ ((_, CharPresentation _ ch):_)) =
-                                    ch
-                                  getCh _ = ""
-                          _ ->
-                            ListPresentation
-                              typeString
-                              (map (snd $(presentVar)) xs)))|]))
+        (let
+           presentVar = varE (presentVarName typeVariable)
+           in lamE
+                [varP (presentVarName typeVariable)]
+                [|(let
+                     typeString = "[" ++ fst $(presentVar) ++ "]"
+                     in ( typeString
+                        , \xs ->
+                            case fst $(presentVar) of
+                              "GHC.Types.Char" ->
+                                ChoicePresentation
+                                  "String"
+                                  [ ( "String"
+                                    , StringPresentation
+                                        "String"
+                                        (concatMap
+                                           getCh
+                                           (map (snd $(presentVar)) xs)))
+                                  , ( "List of characters"
+                                    , ListPresentation
+                                        typeString
+                                        (map (snd $(presentVar)) xs))
+                                  ]
+                                where getCh (CharPresentation "GHC.Types.Char" ch) =
+                                        ch
+                                      getCh (ChoicePresentation _ ((_, CharPresentation _ ch):_)) =
+                                        ch
+                                      getCh _ = ""
+                              _ ->
+                                ListPresentation
+                                  typeString
+                                  (map (snd $(presentVar)) xs)))|]))
   ]
 ```
 

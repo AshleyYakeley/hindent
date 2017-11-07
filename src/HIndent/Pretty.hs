@@ -313,15 +313,6 @@ swing a b =
                      _ <- column (orig + indentSpaces) b
                      return ()
 
--- | Swing the second printer below and indented with respect to the first by
--- the specified amount.
-swingBy :: Int64 -> Printer() -> Printer b -> Printer b
-swingBy i a b =
-  do orig <- gets psIndentLevel
-     a
-     newline
-     column (orig + i) b
-
 --------------------------------------------------------------------------------
 -- * Instances
 
@@ -459,21 +450,6 @@ instance Pretty Exp where
 
 -- | Render an expression.
 exp :: Exp NodeInfo -> Printer ()
--- | Do after lambda should swing.
-exp (Lambda _ pats (Do l stmts)) =
-  do
-     mst <-
-          fitsOnOneLine
-            (do write "\\"
-                spaced (map pretty pats)
-                write " -> "
-                pretty (Do l stmts))
-     case mst of
-       Nothing -> swing (do write "\\"
-                            spaced (map pretty pats)
-                            write " -> do")
-                         (lined (map pretty stmts))
-       Just st -> put st
 -- | Space out tuples.
 exp (Tuple _ boxed exps) = do
   let horVariant = parensHorB boxed $ inter (write ", ") (map pretty exps)
@@ -569,11 +545,10 @@ exp (List _ es) =
 exp (RecUpdate _ exp' updates) = recUpdateExpr (pretty exp') updates
 exp (RecConstr _ qname updates) = recUpdateExpr (pretty qname) updates
 exp (Let _ binds e) =
-  depend (write "let ")
+  swing (write "let")
          (do pretty binds
              newline
-             indented (-4) (depend (write "in ")
-                                   (pretty e)))
+             depend (write "in ") (pretty e))
 exp (ListComp _ e qstmt) = do
   let horVariant = brackets $ do
         pretty e
@@ -620,7 +595,7 @@ exp (Lambda _ ps e) = do
               pretty x
          | (i, x) <- zip [0 :: Int ..] ps
          ]
-  swing (write " ->") $ pretty e
+  mightSwingExp (write " ->") e
 exp (Paren _ e) = parens (pretty e)
 exp (Case _ e alts) =
   do depend (write "case ")
@@ -631,10 +606,10 @@ exp (Case _ e alts) =
        else do newline
                indentedBlock (lined (map (withCaseContext True . pretty) alts))
 exp (Do _ stmts) =
-  depend (write "do ")
+  swing (write "do")
          (lined (map pretty stmts))
 exp (MDo _ stmts) =
-  depend (write "mdo ")
+  swing (write "mdo")
          (lined (map pretty stmts))
 exp (LeftSection _ e op) =
   parens (depend (do pretty e
@@ -1606,14 +1581,8 @@ stmt (Qualifier _ e@(InfixApp _ a op b)) =
                  (sandbox (write ""))
      infixApp e a op b (Just col)
 stmt (Generator _ p e) =
-  do indentSpaces <- getIndentSpaces
-     pretty p
-     indented indentSpaces
-              (dependOrNewline
-                 (write " <-")
-                 space
-                 e
-                 pretty)
+  do pretty p
+     mightSwingExp (write " <-") e
 stmt x = case x of
            Generator _ p e ->
              depend (do pretty p
@@ -1621,40 +1590,28 @@ stmt x = case x of
                     (pretty e)
            Qualifier _ e -> pretty e
            LetStmt _ binds ->
-             depend (write "let ")
+             swing (write "let")
                     (pretty binds)
            RecStmt _ es ->
-             depend (write "rec ")
+             swing (write "rec")
                     (lined (map pretty es))
 
--- | Make the right hand side dependent if it fits on one line,
--- otherwise send it to the next line.
-dependOrNewline
-  :: Printer ()
-  -> Printer ()
-  -> Exp NodeInfo
-  -> (Exp NodeInfo -> Printer ())
-  -> Printer ()
-dependOrNewline left prefix right f =
-  do msg <- fitsOnOneLine renderDependent
-     case msg of
-       Nothing -> do left
-                     newline
-                     (f right)
-       Just st -> put st
-  where renderDependent = depend left (do prefix; f right)
+swingable :: Exp NodeInfo -> Bool
+swingable (InfixApp _ a _ _) = swingable a
+swingable (Let _ _ _) = True
+swingable (Do _ _) = True
+swingable (MDo _ _) = True
+swingable _ = False
 
--- | Handle do and case specially and also space out guards more.
+mightSwingExp :: Printer () -> Exp NodeInfo -> Printer ()
+mightSwingExp p e | swingable e = do
+  p
+  space
+  pretty e
+mightSwingExp p e = swing p $ pretty e
+
+-- | Space out guards more.
 rhs :: Rhs NodeInfo -> Printer ()
-rhs (UnGuardedRhs _ (Do _ dos)) =
-  do inCase <- gets psInsideCase
-     write (if inCase then " -> " else " = ")
-     indentSpaces <- getIndentSpaces
-     let indentation | inCase = indentSpaces
-                     | otherwise = max 2 indentSpaces
-     swingBy indentation
-             (write "do")
-             (lined (map pretty dos))
 rhs (UnGuardedRhs _ e) = do
   msg <-
     fitsOnOneLine
@@ -1663,7 +1620,7 @@ rhs (UnGuardedRhs _ e) = do
           write " "
           pretty e)
   case msg of
-    Nothing -> swing (write " " >> rhsSeparator) (pretty e)
+    Nothing -> mightSwingExp (write " " >> rhsSeparator) e
     Just st -> put st
 rhs (GuardedRhss _ gas) =
   do newline
@@ -1676,20 +1633,6 @@ rhs (GuardedRhss _ gas) =
 
 -- | Implement dangling right-hand-sides.
 guardedRhs :: GuardedRhs NodeInfo -> Printer ()
--- | Handle do specially.
-
-guardedRhs (GuardedRhs _ stmts (Do _ dos)) =
-  do indented 1
-              (do prefixedLined
-                    ","
-                    (map (\p ->
-                            do space
-                               pretty p)
-                         stmts))
-     inCase <- gets psInsideCase
-     write (if inCase then " -> " else " = ")
-     swing (write "do")
-            (lined (map pretty dos))
 guardedRhs (GuardedRhs _ stmts e) = do
     mst <- fitsOnOneLine printStmts
     case mst of
@@ -1718,7 +1661,7 @@ guardedRhs (GuardedRhs _ stmts e) = do
                     space
                     pretty p)
                  stmts))
-    swingIt = swing (write " " >> rhsSeparator) (pretty e)
+    swingIt = mightSwingExp (write " " >> rhsSeparator) e
 
 match :: Match NodeInfo -> Printer ()
 match (Match _ name pats rhs' mbinds) =
@@ -2097,13 +2040,13 @@ infixApp e a op b indent =
       beforeRhs <- case a of
                      Do _ _ -> do
                        indentSpaces <- getIndentSpaces
-                       column (fromMaybe 0 indent + indentSpaces + 3) (newline >> pretty op) -- 3 = "do "
+                       column (fromMaybe 0 indent + indentSpaces) (newline >> pretty op)
                        return space
                      _ -> space >> pretty op >> return newline
       case b of
         Lambda{} -> space >> pretty b
         LCase{} -> space >> pretty b
-        Do _ stmts -> swing (write " do") $ lined (map pretty stmts)
+        _ | swingable b -> mightSwingExp (return ()) b
         _ -> do
           beforeRhs
           case indent of
