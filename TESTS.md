@@ -1399,6 +1399,59 @@ class (Eq a, Show a) =>
   fromInteger :: Integer -> a
 ```
 
+michalrus `let … in …` inside of `do` breaks compilation #467
+
+```haskell
+-- https://github.com/commercialhaskell/hindent/issues/467
+main :: IO ()
+main = do
+  let
+    x = 5
+    in when (x > 0) (return ())
+```
+
+sophie-h Breaking valid top-level template haskell #473
+
+```haskell
+-- https://github.com/commercialhaskell/hindent/issues/473
+template $
+  haskell
+    [ ''SomeVeryLongName
+    , ''AnotherLongNameEvenLongToBreakTheLine
+    , ''LastLongNameInList
+    ]
+```
+
+schroffl Hindent produces invalid Syntax from FFI exports #479
+
+```haskell
+-- https://github.com/commercialhaskell/hindent/issues/479
+foreign export ccall "test" test :: IO ()
+
+foreign import ccall "test" test :: IO ()
+
+foreign import ccall safe "test" test :: IO ()
+
+foreign import ccall unsafe "test" test :: IO ()
+```
+
+ptek Reformatting of the {-# OVERLAPPING #-} pragma #386
+
+```haskell
+-- https://github.com/commercialhaskell/hindent/issues/386
+instance {-# OVERLAPPING #-} Arbitrary (Set Int) where
+  arbitrary = undefined
+```
+
+cdsmith Quotes are dropped from package imports #480
+
+```haskell
+-- https://github.com/commercialhaskell/hindent/issues/480
+{-# LANGUAGE PackageImports #-}
+
+import qualified "base" Prelude as P
+```
+
 # MINIMAL pragma
 
 Monad example

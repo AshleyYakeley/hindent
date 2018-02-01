@@ -442,8 +442,7 @@ prettyQuoteQName x =
     Special _ s -> pretty s
 
 instance Pretty Type where
-  prettyInternal  =
-    typ
+  prettyInternal = typ
 
 instance Pretty Exp where
   prettyInternal = exp
@@ -477,6 +476,7 @@ exp (TupleSection _ boxed mexps) = do
     parensHorB Unboxed = wrap "(# " " #)"
     parensVerB Boxed = parens
     parensVerB Unboxed = wrap "(#" "#)"
+exp (UnboxedSum{}) = error "FIXME: No implementation for UnboxedSum."
 -- | Infix apps, same algorithm as ChrisDone at the moment.
 exp e@(InfixApp _ a op b) =
   infixApp e a op b Nothing
@@ -581,8 +581,6 @@ exp (ParComp _ e qstmts) = do
 exp (TypeApp _ t) = do
   write "@"
   pretty t
-
-exp (ExprHole {}) = write "_"
 exp (NegApp _ e) =
   depend (write "-")
          (pretty e)
@@ -756,15 +754,6 @@ instance Pretty Decl where
 
 -- | Render a declaration.
 decl ::  Decl NodeInfo -> Printer ()
-decl (PatBind _ pat rhs' mbinds) =
-  do pretty pat
-     withCaseContext False (pretty rhs')
-     case mbinds of
-       Nothing -> return ()
-       Just binds ->
-         do newline
-            indentedBlock (depend (write "where ")
-                                  (pretty binds))
 decl (InstDecl _ moverlap dhead decls) =
   do depend (write "instance ")
             (depend (maybeOverlap moverlap)
@@ -841,8 +830,8 @@ decl (DataDecl _ dataornew ctx dhead condecls mderivs) =
                            xs -> multiCons xs))
      indentSpaces <- getIndentSpaces
      case mderivs of
-       Nothing -> return ()
-       Just derivs ->
+       [] -> return ()
+       [derivs] ->
          do newline
             column indentSpaces (pretty derivs)
   where singleCons x =
@@ -875,10 +864,9 @@ decl (GDataDecl _ dataornew ctx dhead mkind condecls mderivs) =
            newline
            lined (map pretty condecls)
        case mderivs of
-         Nothing -> return ()
-         Just derivs ->
-           do newline
-              pretty derivs
+         [] -> return ()
+         [derivs] -> do newline
+                        pretty derivs
 
 decl (InlineSig _ inline active name) = do
   write "{-# "
@@ -895,6 +883,37 @@ decl (InlineSig _ inline active name) = do
 decl (MinimalPragma _ (Just formula)) =
   wrap "{-# " " #-}" $ do
     depend (write "MINIMAL ") $ pretty formula
+decl (ForImp _ callconv maybeSafety maybeName name ty) = do
+  string "foreign import "
+  pretty' callconv >> space
+  case maybeSafety of
+    Just safety -> pretty' safety >> space
+    Nothing -> return ()
+  case maybeName of
+    Just namestr -> string (show namestr) >> space
+    Nothing -> return ()
+  pretty' name
+  tyline <- fitsOnOneLine $ do string " :: "
+                               pretty' ty
+  case tyline of
+    Just line -> put line
+    Nothing -> do newline
+                  indentedBlock $ do string ":: "
+                                     pretty' ty
+decl (ForExp _ callconv maybeName name ty) = do
+  string "foreign export "
+  pretty' callconv >> space
+  case maybeName of
+    Just namestr -> string (show namestr) >> space
+    Nothing -> return ()
+  pretty' name
+  tyline <- fitsOnOneLine $ do string " :: "
+                               pretty' ty
+  case tyline of
+    Just line -> put line
+    Nothing -> do newline
+                  indentedBlock $ do string ":: "
+                                     pretty' ty
 decl x' = pretty' x'
 
 classHead
@@ -931,7 +950,7 @@ instance Pretty TypeEqn where
     pretty out_
 
 instance Pretty Deriving where
-  prettyInternal (Deriving _ heads) =
+  prettyInternal (Deriving _ _ heads) =
     depend (write "deriving" >> space) $ do
       let heads' =
             if length heads == 1
@@ -977,15 +996,7 @@ instance Pretty Asst where
         pretty b
       ParenA _ asst -> parens (pretty asst)
       AppA _ name tys ->
-        let
-#if MIN_VERSION_haskell_src_exts(1,19,0)
-          hse_workaround = id
-#else
-          -- Workaround for bug in haskell-src-exts < 1.19.0
-          -- <https://github.com/haskell-suite/haskell-src-exts/issues/328>
-          hse_workaround = reverse
-#endif
-        in spaced (pretty name : map pretty (hse_workaround tys))
+        spaced (pretty name : map pretty tys)
       WildCardA _ name ->
         case name of
           Nothing -> write "_"
@@ -1222,12 +1233,21 @@ instance Pretty DeclHead where
 
 instance Pretty Overlap where
   prettyInternal (Overlap _) = write "{-# OVERLAP #-}"
+  prettyInternal (Overlapping _) = write "{-# OVERLAPPING #-}"
+  prettyInternal (Overlaps _) = write "{-# OVERLAPS #-}"
+  prettyInternal (Overlappable _) = write "{-# OVERLAPPABLE #-}"
   prettyInternal (NoOverlap _) = write "{-# NO_OVERLAP #-}"
   prettyInternal (Incoherent _) = write "{-# INCOHERENT #-}"
 
 instance Pretty Sign where
   prettyInternal (Signless _) = return ()
   prettyInternal (Negative _) = write "-"
+
+instance Pretty CallConv where
+  prettyInternal = pretty'
+
+instance Pretty Safety where
+  prettyInternal = pretty'
 
 --------------------------------------------------------------------------------
 -- * Unimplemented or incomplete printers
@@ -1496,6 +1516,7 @@ instance Pretty SpecialCon where
                 " #)")
       Cons _ -> write ":"
       UnboxedSingleCon _ -> write "(##)"
+      ExprHole _ -> write "_"
 
 instance Pretty QOp where
   prettyInternal = pretty'
@@ -1527,7 +1548,7 @@ instance Pretty ImportDecl where
     when qualified $ write " qualified"
     case mpkg of
       Nothing -> return ()
-      Just pkg -> space >> write pkg
+      Just pkg -> space >> write ("\"" ++ pkg ++ "\"")
     space
     pretty name
     case mas of
@@ -1746,18 +1767,26 @@ typ (TyCon _ p) =
         FunCon _ -> parens (pretty p)
         _ -> pretty p
 typ (TyParen _ e) = parens (pretty e)
-typ (TyInfix _ a op b) = do
+typ (TyInfix _ a promotedop b) = do
   -- Apply special rules to line-break operators.
-  linebreak <- isLineBreak op
+  let isLineBreak' op =
+        case op of
+          PromotedName _ op' -> isLineBreak op'
+          UnpromotedName _ op' -> isLineBreak op'
+      prettyInfixOp' op =
+        case op of
+          PromotedName _ op' -> write "'" >> prettyInfixOp op'
+          UnpromotedName _ op' -> prettyInfixOp op'
+  linebreak <- isLineBreak' promotedop
   if linebreak
     then do pretty a
             newline
-            prettyInfixOp op
+            prettyInfixOp' promotedop
             space
             pretty b
     else do pretty a
             space
-            prettyInfixOp op
+            prettyInfixOp' promotedop
             space
             pretty b
 typ (TyKind _ ty k) =
@@ -1802,6 +1831,7 @@ typ (TyQuasiQuote _ n s) =
                        write "|")
                    (do string s
                        write "|"))
+typ (TyUnboxedSum{}) = error "FIXME: No implementation for TyUnboxedSum."
 
 prettyTopName :: Name NodeInfo -> Printer ()
 prettyTopName x@Ident{} = pretty x
@@ -1851,8 +1881,9 @@ decl' (DataDecl _ dataornew ctx dhead [con] mderivs)
                        (do pretty dhead
                            singleCons con))
        case mderivs of
-         Nothing -> return ()
-         Just derivs -> space >> pretty derivs
+         [] -> return ()
+         [derivs] -> do space
+                        pretty derivs
   where singleCons x =
           depend (write " =")
                  ((depend space . qualConDecl) x)
@@ -2056,7 +2087,14 @@ infixApp e a op b indent =
         _ -> do
           beforeRhs
           case indent of
-            Nothing -> prettyWithIndent b
+            Nothing -> do
+              col <- fmap (psColumn . snd)
+                          (sandbox (write ""))
+              -- force indent for top-level template haskell expressions, #473.
+              if col == 0
+                then do indentSpaces <- getIndentSpaces
+                        column indentSpaces (prettyWithIndent b)
+                else prettyWithIndent b
             Just col -> do
               indentSpaces <- getIndentSpaces
               column (col + indentSpaces) (prettyWithIndent b)
