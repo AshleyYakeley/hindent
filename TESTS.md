@@ -722,8 +722,8 @@ bob -- after bob
        )
     , 3
     ]
-    -- in the end of the function
   where
+    -- before alpha
     alpha = alpha
     -- between alpha and beta
     beta = beta
@@ -788,6 +788,108 @@ Comments around regular declarations
 -- | Main entry point.
 main = putStrLn "Hello, World!"
 -- This is another random comment.
+```
+
+Module export comments 1
+
+``` haskell
+module M
+  (
+  -- * A
+    a
+  -- * B
+  , b
+  ) where
+
+a = ()
+
+b = ()
+```
+
+Module export comments 2
+
+``` haskell
+module M
+  (
+  -- A1
+  -- A2
+    a
+  -- B1
+  -- B2
+  , b
+  -- C1
+  -- C2
+  ) where
+
+a = ()
+
+b = ()
+```
+
+Class comments
+
+``` haskell
+class C a where
+  -- | About f
+  f :: a
+  -- | About g
+  g :: a -> IO ()
+```
+
+Instance comments
+
+``` haskell
+instance C a where
+  -- | About f
+  f = 1
+  -- | About g
+  g = 2
+```
+
+GADT comments
+
+``` haskell
+data GADT a where
+  -- | About F
+  F :: a -> GADT a
+  -- | About G
+  G :: a -> IO () -> GADT a
+```
+
+Let comments
+
+``` haskell
+ff x = let
+  -- about p
+  p = x + 1
+  -- about q
+  q = p / x
+  in p + q
+```
+
+Case comments
+
+``` haskell
+ff x =
+  case x of
+    -- Just 1
+    -- Just 2
+    Just a -> a
+    -- Nothing 1
+    -- Nothing 2
+    Nothing -> 0
+```
+
+Do comments
+
+``` haskell
+ff x = do
+  -- 1a
+  -- 1b
+  a <- x
+  -- 2a
+  -- 2b
+  return a
 ```
 
 Multi-line comments

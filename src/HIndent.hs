@@ -237,6 +237,7 @@ runPrinterStyle config m =
               , psInsideCase = False
               , psHardLimit = False
               , psEolComment = False
+              , psDeferredComments = return ()
               }))))
 
 -- | Parse mode, includes all extensions, doesn't assume any fixities.

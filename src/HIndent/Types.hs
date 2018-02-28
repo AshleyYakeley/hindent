@@ -8,8 +8,10 @@
 -- | All types.
 
 module HIndent.Types
-  (Printer(..)
+  (Printer
   ,PrintState(..)
+  ,runPrinter
+  ,doDeferredComments
   ,Config(..)
   ,defaultConfig
   ,NodeInfo(..)
@@ -19,7 +21,7 @@ module HIndent.Types
 
 import           Control.Applicative
 import           Control.Monad
-import           Control.Monad.State.Strict (MonadState(..),StateT)
+import           Control.Monad.State.Strict (MonadState(..),StateT,gets,modify)
 import           Control.Monad.Trans.Maybe
 import           Data.ByteString.Builder
 import           Data.Functor.Identity
@@ -31,7 +33,7 @@ import           Language.Haskell.Exts.SrcLoc
 
 -- | A pretty printing monad.
 newtype Printer a =
-  Printer {runPrinter :: StateT PrintState (MaybeT Identity) a}
+  Printer {runPrinter' :: StateT PrintState (MaybeT Identity) a}
   deriving (Applicative,Monad,Functor,MonadState PrintState,MonadPlus,Alternative)
 
 -- | The state of the pretty printer.
@@ -54,7 +56,21 @@ data PrintState = PrintState
   , psHardLimit :: !Bool
     -- ^ Bail out if we exceed current column.
   , psEolComment :: !Bool
+  , psDeferredComments :: !(Printer ())
+    -- ^ comments deferred to the next write
   }
+
+doDeferredComments :: Printer ()
+doDeferredComments =
+  do defcoms <- gets psDeferredComments
+     modify $ \s -> s {psDeferredComments = return ()}
+     defcoms
+
+runPrinter :: Printer a -> StateT PrintState (MaybeT Identity) a
+runPrinter p = runPrinter' $
+  do a <- p
+     doDeferredComments
+     return a
 
 -- | Configurations shared among the different styles. Styles may pay
 -- attention to or completely disregard this configuration.
