@@ -1976,7 +1976,7 @@ qualConDecl :: QualConDecl NodeInfo -> Printer ()
 qualConDecl (QualConDecl _ tyvars ctx d) =
   depend (unless (null (fromMaybe [] tyvars))
                  (do write "forall "
-                     spaced (map pretty (fromMaybe [] tyvars))
+                     spaced (map pretty (reverse (fromMaybe [] tyvars)))
                      write ". "))
          (withCtx ctx (recDecl d))
 

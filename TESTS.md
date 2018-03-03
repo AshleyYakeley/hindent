@@ -1485,6 +1485,16 @@ data D =
                   c
 ```
 
+AshleyYakeley Existential Quantification reordered
+
+```haskell
+{-# LANGUAGE ExistentialQuantification #-}
+
+data T = forall a b. T
+  { t :: a -> b
+  }
+```
+
 sophie-h Regression: Breaks basic type class code by inserting "|" #459
 
 ```haskell
