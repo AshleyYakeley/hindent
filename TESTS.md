@@ -409,6 +409,19 @@ Class constraints
 fun :: (Class a, Class b) => a -> b -> c
 ```
 
+Big class constraints
+
+``` haskell
+class Class a where
+  default fun ::
+    ( ClassXXXXXXXXXXXXXXXXXXXXXXXX1 a
+    , ClassXXXXXXXXXXXXXXXXXXXXXXXX2 a
+    , ClassXXXXXXXXXXXXXXXXXXXXXXXX3 a
+    , ClassXXXXXXXXXXXXXXXXXXXXXXXX4 a
+    ) => a -> a
+  fun = id
+```
+
 Tuples
 
 ``` haskell
@@ -427,8 +440,7 @@ Default signatures
 -- https://github.com/chrisdone/hindent/issues/283
 class Foo a where
   bar :: a -> a -> a
-  default bar :: Monoid a =>
-    a -> a -> a
+  default bar :: Monoid a => a -> a -> a
   bar = mappend
 ```
 
@@ -1137,8 +1149,7 @@ ivan-timokhin variables swapped around in constraints #278
 ```haskell
 -- https://github.com/chrisdone/hindent/issues/278
 data Link c1 c2 a c =
-  forall b. (c1 a b, c2 b c) =>
-            Link (Proxy b)
+  forall b. (c1 a b, c2 b c) => Link (Proxy b)
 ```
 
 ttuegel qualified infix sections get mangled #273
@@ -1293,7 +1304,7 @@ instance Num a => C a
 
 -- long instance
 instance Nuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuum a =>
-         C a where
+           C a where
   f = undefined
 ```
 
@@ -1499,12 +1510,10 @@ sophie-h Regression: Breaks basic type class code by inserting "|" #459
 
 ```haskell
 -- https://github.com/commercialhaskell/hindent/issues/459
-class Class1 a =>
-      Class2 a where
+class Class1 a => Class2 a where
   f :: a -> Int
 
-class (Eq a, Show a) =>
-      Num a where
+class (Eq a, Show a) => Num a where
   (+), (-), (*) :: a -> a -> a
   negate :: a -> a
   abs, signum :: a -> a

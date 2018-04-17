@@ -305,13 +305,11 @@ sandbox p =
 
 -- | Render a type with a context, or not.
 withCtx :: (Pretty ast,Show (ast NodeInfo))
-        => Maybe (ast NodeInfo) -> Printer b -> Printer b
-withCtx Nothing m = m
+        => Maybe (ast NodeInfo) -> Printer b -> Printer ()
+withCtx Nothing m = m >> return ()
 withCtx (Just ctx) m =
   do pretty ctx
-     write " =>"
-     newline
-     m
+     swing (writeDefer " =>") m
 
 -- | Maybe render an overlap definition.
 maybeOverlap ::  Maybe (Overlap NodeInfo) -> Printer ()
@@ -1070,8 +1068,7 @@ instance Pretty ClassDecl where
       ClsDefSig _ name ty ->
         do write "default "
            pretty name
-           writeDefer " :: "
-           pretty ty
+           swing (writeDefer " ::") $ pretty ty
 
 instance Pretty ConDecl where
   prettyInternal x =
@@ -1740,7 +1737,8 @@ context ctx =
   case ctx of
     CxSingle _ a -> pretty a
     CxTuple _ as -> do
-      depend (write "( ") $ prefixedLined ", " (map pretty as)
+      write "( "
+      sequence_ $ intersperse (newline >> write ", ") $ map pretty as
       newline
       write ")"
     CxEmpty _ -> parens (return ())
@@ -1755,12 +1753,12 @@ typ (TyTuple _ Unboxed types) = do
   let verVar = wrap "(#" " #)" $ prefixedLined "," (map (depend space . pretty) types)
   horVar `ifFitsOnOneLineOrElse` verVar
 typ (TyForall _ mbinds ctx ty) =
-  depend (case mbinds of
-            Nothing -> return ()
-            Just ts ->
+        (case mbinds of
+            Nothing -> id
+            Just ts -> swing $
               do write "forall "
                  spaced (map pretty ts)
-                 write ". ")
+                 write ".")
          (do indentSpaces <- getIndentSpaces
              withCtx ctx (indented indentSpaces (pretty ty)))
 typ (TyFun _ a b) =
