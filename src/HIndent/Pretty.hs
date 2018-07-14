@@ -16,7 +16,7 @@ module HIndent.Pretty
 import           Control.Applicative
 import           Control.Monad.State.Strict hiding (state)
 import qualified Data.ByteString.Builder as S
-import           Data.Foldable (for_, traverse_)
+import           Data.Foldable (for_, forM_, traverse_)
 import           Data.Int
 import           Data.List
 import           Data.Maybe
@@ -849,11 +849,7 @@ decl (DataDecl _ dataornew ctx dhead condecls mderivs) =
                            [x] -> singleCons x
                            xs -> multiCons xs))
      indentSpaces <- getIndentSpaces
-     case mderivs of
-       [] -> return ()
-       [derivs] ->
-         do newline
-            column indentSpaces (pretty derivs)
+     forM_ mderivs $ \deriv -> newline >> column indentSpaces (pretty deriv)
   where singleCons x =
           do writeDefer " ="
              indentSpaces <- getIndentSpaces
@@ -883,10 +879,7 @@ decl (GDataDecl _ dataornew ctx dhead mkind condecls mderivs) =
          _ -> do
            newline
            lined (map pretty condecls)
-       case mderivs of
-         [] -> return ()
-         [derivs] -> do newline
-                        pretty derivs
+       forM_ mderivs $ \deriv -> newline >> pretty deriv
 
 decl (InlineSig _ inline active name) = do
   write "{-# "
@@ -970,8 +963,8 @@ instance Pretty TypeEqn where
     pretty out_
 
 instance Pretty Deriving where
-  prettyInternal (Deriving _ _ heads) =
-    depend (write "deriving" >> space) $ do
+  prettyInternal (Deriving _ strategy heads) =
+    depend (write "deriving" >> space >> writeStrategy) $ do
       let heads' =
             if length heads == 1
               then map stripParens heads
@@ -981,12 +974,22 @@ instance Pretty Deriving where
         Nothing -> formatMultiLine heads'
         Just derives -> put derives
     where
+      writeStrategy = case strategy of
+        Nothing -> return ()
+        Just st -> pretty st >> space
       stripParens (IParen _ iRule) = stripParens iRule
       stripParens x = x
       formatMultiLine derives = do
         depend (write "( ") $ prefixedLined ", " (map pretty derives)
         newline
         write ")"
+
+instance Pretty DerivStrategy where
+  prettyInternal x =
+    case x of
+      DerivStock _ -> return ()
+      DerivAnyclass _ -> write "anyclass"
+      DerivNewtype _ -> write "newtype"
 
 instance Pretty Alt where
   prettyInternal x =
@@ -1900,10 +1903,7 @@ decl' (DataDecl _ dataornew ctx dhead [con] mderivs)
               (withCtx ctx
                        (do pretty dhead
                            singleCons con))
-       case mderivs of
-         [] -> return ()
-         [derivs] -> do space
-                        pretty derivs
+       forM_ mderivs $ \deriv -> space >> pretty deriv
   where singleCons x =
           depend (writeDefer " =")
                  ((depend space . qualConDecl) x)

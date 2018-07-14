@@ -1,14 +1,22 @@
+{-# LANGUAGE CPP #-}
+
 module HIndent.CabalFile
   ( getCabalExtensionsForSourcePath
   ) where
 
+import Control.Monad
+import qualified Data.ByteString as BS
 import Data.List
 import Data.Maybe
 import Data.Traversable
 import Distribution.ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Configuration
+#if MIN_VERSION_Cabal(2, 2, 0)
+import Distribution.PackageDescription.Parsec
+#else
 import Distribution.PackageDescription.Parse
+#endif
 import Language.Haskell.Extension
 import qualified Language.Haskell.Exts.Extension as HSE
 import System.Directory
@@ -75,12 +83,26 @@ packageStanzas pd = let
 findCabalFiles :: FilePath -> FilePath -> IO (Maybe ([FilePath], FilePath))
 findCabalFiles dir rel = do
   names <- getDirectoryContents dir
-  let cabalnames = filter (isSuffixOf ".cabal") names
+  cabalnames <-
+    filterM (doesFileExist . (dir </>)) $ filter (isSuffixOf ".cabal") names
   case cabalnames of
     []
       | dir == "/" -> return Nothing
     [] -> findCabalFiles (takeDirectory dir) (takeFileName dir </> rel)
     _ -> return $ Just (fmap (\n -> dir </> n) cabalnames, rel)
+
+getGenericPackageDescription :: FilePath -> IO (Maybe GenericPackageDescription)
+#if MIN_VERSION_Cabal(2, 2, 0)
+getGenericPackageDescription cabalPath = do
+    cabaltext <- BS.readFile cabalPath
+    return $ parseGenericPackageDescriptionMaybe cabaltext
+#else
+getGenericPackageDescription cabalPath = do
+  cabaltext <- readFile cabalPath
+  case parsePackageDescription cabaltext of
+    ParseOk _ gpd -> return $ Just gpd
+    _             -> return Nothing
+#endif
 
 -- | Find the `Stanza` that refers to this source path
 getCabalStanza :: FilePath -> IO (Maybe Stanza)
@@ -91,10 +113,10 @@ getCabalStanza srcpath = do
     Just (cabalpaths, relpath) -> do
       stanzass <-
         for cabalpaths $ \cabalpath -> do
-          cabaltext <- readFile cabalpath
-          case parsePackageDescription cabaltext of
-            ParseFailed _ -> return []
-            ParseOk _ gpd -> do
+          genericPackageDescription <- getGenericPackageDescription cabalpath
+          case genericPackageDescription of
+            Nothing -> return []
+            Just gpd -> do
               return $ packageStanzas $ flattenPackageDescription gpd
       return $
         case filter (\stanza -> stanzaIsSourceFilePath stanza relpath) $
