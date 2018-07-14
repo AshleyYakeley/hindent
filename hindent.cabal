@@ -53,6 +53,7 @@ executable hindent
   ghc-options:       -Wall -O2
   main-is:           Main.hs
   other-modules: Path.Find
+                Paths_hindent
   build-depends:     base >= 4 && < 5
                    , hindent
                    , bytestring
