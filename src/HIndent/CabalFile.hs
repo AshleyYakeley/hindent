@@ -5,6 +5,9 @@ module HIndent.CabalFile
   ) where
 
 import Control.Monad
+#if MIN_VERSION_Cabal(2, 2, 0)
+import qualified Data.ByteString as BS
+#endif
 import Data.List
 import Data.Maybe
 import Data.Traversable
@@ -98,7 +101,11 @@ getGenericPackageDescription cabalPath = do
 #else
 getGenericPackageDescription cabalPath = do
   cabaltext <- readFile cabalPath
+#if MIN_VERSION_Cabal(2, 0, 0)
   case parseGenericPackageDescription cabaltext of
+#else
+  case parsePackageDescription cabaltext of
+#endif
     ParseOk _ gpd -> return $ Just gpd
     _             -> return Nothing
 #endif

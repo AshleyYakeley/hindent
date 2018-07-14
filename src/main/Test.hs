@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 
 -- | Test the pretty printer.
 module Main where
@@ -13,7 +14,10 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 import qualified Data.ByteString.Lazy.UTF8 as LUTF8
 import qualified Data.ByteString.UTF8 as UTF8
 import           Data.Function
+#if MIN_VERSION_base(4, 11, 1)
+#else
 import           Data.Monoid
+#endif
 import qualified HIndent
 import           HIndent.Types
 import           Markdone

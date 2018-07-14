@@ -1,5 +1,6 @@
 {-# LANGUAGE Unsafe #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -fno-warn-dodgy-imports #-}
 
 -- | Main entry point to hindent.
 --
