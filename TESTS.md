@@ -129,6 +129,24 @@ fun2 :: Def ('[ Ref s (Stored Uint32), IBool] ':-> IBool)
 fun2 = undefined
 ```
 
+Type declaration with promoted type constructor in quantifier
+
+```haskell
+{-# LANGUAGE TypeInType #-}
+
+fun :: forall (t :: Proxy 'True). Proxy t
+fun = undefined
+```
+
+Type declaration with infix promoted type constructor in quantifier
+
+```haskell
+{-# LANGUAGE TypeInType #-}
+
+fun :: forall a b (t :: Proxy (a ': b)). Proxy t
+fun = undefined
+```
+
 Instance declaration without decls
 
 ``` haskell

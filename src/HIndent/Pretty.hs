@@ -1163,7 +1163,7 @@ instance Pretty QualConDecl where
                        (pretty d))
 
 instance Pretty GadtDecl where
-  prettyInternal (GadtDecl _ name fields t) =
+  prettyInternal (GadtDecl _ name _ _ fields t) =
     horVar `ifFitsOnOneLineOrElse` verVar
     where
       fields' p =
@@ -1477,9 +1477,6 @@ instance Pretty DataOrNew where
 instance Pretty FunDep where
   prettyInternal = pretty'
 
-instance Pretty Kind where
-  prettyInternal = pretty'
-
 instance Pretty ResultSig where
   prettyInternal (KindSig _ kind) = pretty kind
   prettyInternal (TyVarSig _ tyVarBind) = pretty tyVarBind
@@ -1766,6 +1763,7 @@ typ (TyForall _ mbinds ctx ty) =
                  write ".")
          (do indentSpaces <- getIndentSpaces
              withCtx ctx (indented indentSpaces (pretty ty)))
+typ (TyStar _) = write "*"
 typ (TyFun _ a b) =
   depend (do pretty a
              write " -> ")
