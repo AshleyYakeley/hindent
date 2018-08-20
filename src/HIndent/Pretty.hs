@@ -304,7 +304,7 @@ sandbox p =
      return (a,new)
 
 -- | Render a type with a context, or not.
-withCtx :: (Pretty ast,Show (ast NodeInfo))
+withCtx :: Pretty ast
         => Maybe (ast NodeInfo) -> Printer b -> Printer ()
 withCtx Nothing m = m >> return ()
 withCtx (Just ctx) m =
