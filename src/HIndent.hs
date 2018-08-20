@@ -334,7 +334,7 @@ readExtension x =
 
 -- | Traverse the structure backwards.
 traverseInOrder
-  :: (Monad m, Traversable t, Functor m)
+  :: (Monad m, Traversable t)
   => (b -> b -> Ordering) -> (b -> m b) -> t b -> m (t b)
 traverseInOrder cmp f ast = do
   indexed <-
