@@ -52,6 +52,7 @@ install:
   set +ex
 
 script:
+- stack --version
 - |
   set -ex
   stack --no-terminal --resolver $RESOLVER test --pedantic --bench --no-run-benchmarks --haddock --no-haddock-deps
