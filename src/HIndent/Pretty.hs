@@ -46,7 +46,7 @@ deferComments c = modify $ \s -> let
   in s {psDeferredComments = newDeferredComments}
 
 -- | Pretty print including comments.
-pretty :: (Pretty ast,Show (ast NodeInfo))
+pretty :: Pretty ast
        => ast NodeInfo -> Printer ()
 pretty a = do
   mapM_
