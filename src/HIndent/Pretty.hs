@@ -411,10 +411,7 @@ instance Pretty Pat where
         depend (do pretty e
                    write " -> ")
                (pretty p)
-      PQuasiQuote _ name str ->
-        brackets (depend (do string name
-                             write "|")
-                         (string str))
+      PQuasiQuote _ name str -> quotation name (string str)
       PBangPat _ p ->
         depend (write "!")
                (pretty p)
@@ -449,19 +446,6 @@ prettyQuoteName x =
   case x of
     Ident _ i -> string i
     Symbol _ s -> string ("(" ++ s ++ ")")
-
-prettyQuoteQName :: QName NodeInfo -> Printer ()
-prettyQuoteQName x =
-  case x of
-    Qual _ mn n ->
-      case n of
-        Ident _ i -> do pretty mn; write "."; string i;
-        Symbol _ s -> do write "("; pretty mn; write "."; string s; write ")";
-    UnQual _ n ->
-      case n of
-        Ident _ i -> string i
-        Symbol _ s -> do write "("; string s; write ")";
-    Special _ s -> pretty s
 
 instance Pretty Type where
   prettyInternal = typ
@@ -663,17 +647,13 @@ exp (ExpTypeSig _ e t) =
          (pretty t)
 exp (VarQuote _ x) =
   depend (write "'")
-         (prettyQuoteQName x)
+         (pretty x)
 exp (TypQuote _ x) =
   depend (write "''")
-         (prettyQuoteQName x)
+         (pretty x)
 exp (BracketExp _ b) = pretty b
 exp (SpliceExp _ s) = pretty s
-exp (QuasiQuote _ n s) =
-  brackets (depend (do string n
-                       write "|")
-                   (do string s
-                       write "|"))
+exp (QuasiQuote _ n s) = quotation n (string s)
 exp (LCase _ alts) =
   do write "\\case"
      if null alts
@@ -705,17 +685,9 @@ exp (MultiIf _ alts) =
                          (zip [1..] stmts))))
       swing (space >> rhsSeparator) (pretty e)
 exp (Lit _ lit) = prettyInternal lit
-exp (Var _ q) = case q of
-                  Special _ Cons{} -> parens (pretty q)
-                  Qual _ _ (Symbol _ _) -> parens (pretty q)
-                  UnQual _ (Symbol _ _) -> parens (pretty q)
-                  _ -> pretty q
+exp (Var _ q) = pretty q
 exp (IPVar _ q) = pretty q
-exp (Con _ q) = case q of
-                  Special _ Cons{} -> parens (pretty q)
-                  Qual _ _ (Symbol _ _) -> parens (pretty q)
-                  UnQual _ (Symbol _ _) -> parens (pretty q)
-                  _ -> pretty q
+exp (Con _ q) = pretty q
 exp (Proc _ p e) = mightSwingExp (do
     write "proc "
     pretty p
@@ -892,7 +864,7 @@ decl (InlineSig _ inline active name) = do
     Nothing -> return ()
     Just (ActiveFrom _ x) -> write ("[" ++ show x ++ "] ")
     Just (ActiveUntil _ x) -> write ("[~" ++ show x ++ "] ")
-  prettyQuoteQName name
+  pretty name
 
   write " #-}"
 decl (MinimalPragma _ (Just formula)) =
@@ -1423,24 +1395,9 @@ cNameCompare (ConName _ (Symbol _ s1)) (ConName _ (Symbol _ s2)) = compare s1 s2
 instance Pretty Bracket where
   prettyInternal x =
     case x of
-      ExpBracket _ p ->
-        brackets
-          (depend
-             (write "|")
-             (do pretty p
-                 write "|"))
-      PatBracket _ p ->
-        brackets
-          (depend
-             (write "p|")
-             (do pretty p
-                 write "|"))
-      TypeBracket _ ty ->
-        brackets
-          (depend
-             (write "t|")
-             (do pretty ty
-                 write "|"))
+      ExpBracket _ p -> quotation "" (pretty p)
+      PatBracket _ p -> quotation "p" (pretty p)
+      TypeBracket _ ty -> quotation "t" (pretty ty)
       d@(DeclBracket _ _) -> pretty' d
 
 instance Pretty IPBind where
@@ -1514,12 +1471,18 @@ instance Pretty Name where
 instance Pretty QName where
   prettyInternal =
     \case
-      Qual _ m n -> do
-        pretty m
-        write "."
-        pretty n
-      UnQual _ n -> pretty n
-      Special _ c -> pretty c
+      Qual _ mn n ->
+        case n of
+          Ident _ i -> do pretty mn; write "."; string i;
+          Symbol _ s -> do write "("; pretty mn; write "."; string s; write ")";
+      UnQual _ n ->
+        case n of
+          Ident _ i -> string i
+          Symbol _ s -> do write "("; string s; write ")";
+      Special _ s@Cons{} -> parens (pretty s)
+      Special _ s@FunCon{} -> parens (pretty s)
+      Special _ s -> pretty s
+
 
 instance Pretty SpecialCon where
   prettyInternal s =
@@ -1775,20 +1738,7 @@ typ (TyParArray _ t) =
                write ":")
 typ (TyApp _ f a) = spaced [pretty f, pretty a]
 typ (TyVar _ n) = pretty n
-typ (TyCon _ p) =
-  case p of
-    Qual _ _ name ->
-      case name of
-        Ident _ _ -> pretty p
-        Symbol _ _ -> parens (pretty p)
-    UnQual _ name ->
-      case name of
-        Ident _ _ -> pretty p
-        Symbol _ _ -> parens (pretty p)
-    Special _ con ->
-      case con of
-        FunCon _ -> parens (pretty p)
-        _ -> pretty p
+typ (TyCon _ p) = pretty p
 typ (TyParen _ e) = parens (pretty e)
 typ (TyInfix _ a promotedop b) = do
   -- Apply special rules to line-break operators.
@@ -1849,11 +1799,7 @@ typ (TyWildCard _ name) =
     Just n ->
       do write "_"
          pretty n
-typ (TyQuasiQuote _ n s) =
-  brackets (depend (do string n
-                       write "|")
-                   (do string s
-                       write "|"))
+typ (TyQuasiQuote _ n s) = quotation n (string s)
 typ (TyUnboxedSum{}) = error "FIXME: No implementation for TyUnboxedSum."
 
 prettyTopName :: Name NodeInfo -> Printer ()
@@ -2137,3 +2083,16 @@ flattenOpChain (InfixApp _ left op right) =
   [OpChainLink op] <>
   flattenOpChain right
 flattenOpChain e = [OpChainExp e]
+
+-- | Write a Template Haskell quotation or a quasi-quotation.
+--
+-- >>> quotation "t" (string "Foo")
+-- > [t|Foo|]
+quotation :: String -> Printer () -> Printer ()
+quotation quoter body =
+  brackets
+    (depend
+       (do string quoter
+           write "|")
+       (do body
+           write "|"))

@@ -162,6 +162,14 @@ instance C a where
     k p
 ```
 
+Symbol class constructor in instance declaration
+
+```haskell
+instance Bool :?: Bool
+
+instance (:?:) Int Bool
+```
+
 GADT declarations
 
 ```haskell
@@ -265,6 +273,20 @@ commitToEvent gitFolderPath timezone commit =
     }
 ```
 
+Record with symbol constructor
+
+```haskell
+f = (:..?) {}
+```
+
+Record with symbol field
+
+```haskell
+f x = x {(..?) = wat}
+
+g x = Rec {(..?)}
+```
+
 Cases
 
 ``` haskell
@@ -315,6 +337,34 @@ Operator with lambda-case
 ```haskell
 for xs $ \case
   Left x -> x
+```
+
+Operator in parentheses
+
+```haskell
+cat = (++)
+```
+
+Symbol data constructor in parentheses
+
+```haskell
+cons = (:)
+
+cons' = (:|)
+```
+
+Binary symbol data constructor in pattern
+
+```haskell
+f (x :| _) = x
+
+f' ((:|) x _) = x
+
+f'' ((Data.List.NonEmpty.:|) x _) = x
+
+g (x:xs) = x
+
+g' ((:) x _) = x
 ```
 
 Type application
@@ -400,6 +450,12 @@ Type brackets
 foo :: $([t|Bool|]) -> a
 ```
 
+Quoted data constructors
+
+```haskell
+cons = '(:)
+```
+
 # Type signatures
 
 Long argument list should line break
@@ -440,6 +496,13 @@ class Class a where
   fun = id
 ```
 
+Symbol class constructor in class constraint
+
+```haskell
+f :: (a :?: b) => (a, b)
+f' :: ((:?:) a b) => (a, b)
+```
+
 Tuples
 
 ``` haskell
@@ -468,6 +531,13 @@ Implicit parameters
 f :: (?x :: Int) => Int
 ```
 
+Symbol type constructor
+
+```haskell
+f :: a :?: b
+f' :: (:?:) a b
+```
+
 Promoted list (issue #348)
 
 ```haskell
@@ -488,6 +558,15 @@ a = undefined
 -- nested promoted tuples.
 b :: A '[ '( 'True, 'False, '[], '( 'False, 'True))]
 b = undefined
+```
+
+Prefix promoted symbol type constructor
+
+```haskell
+a :: '(T.:->) 'True 'False
+b :: (T.:->) 'True 'False
+c :: '(:->) 'True 'False
+d :: (:->) 'True 'False
 ```
 
 # Function declarations
@@ -641,6 +720,37 @@ fun Rec { alpha = beta
         , lambda = mu
         } =
   beta + delta + zeta + theta + kappa + mu + beta + delta + zeta + theta + kappa
+```
+
+Symbol constructor, short
+
+```haskell
+fun ((:..?) {}) = undefined
+```
+
+Symbol constructor, long
+
+```
+fun (:..?) { alpha = beta
+           , gamma = delta
+           , epsilon = zeta
+           , eta = theta
+           , iota = kappa
+           , lambda = mu
+           } =
+  beta + delta + zeta + theta + kappa + mu + beta + delta + zeta + theta + kappa
+```
+
+Symbol field
+
+```haskell
+f (X {(..?) = x}) = x
+```
+
+Punned symbol field
+
+```haskell
+f' (X {(..?)}) = (..?)
 ```
 
 # Johan Tibell compatibility checks
@@ -1716,4 +1826,38 @@ Quasi quotes
 
 ```haskell
 exp = [name|exp|]
+
+f [qq|pattern|] = ()
+```
+
+# C preprocessor
+
+Conditionals (`#if`)
+
+```haskell
+isDebug :: Bool
+#if DEBUG
+isDebug = True
+#else
+isDebug = False
+#endif
+```
+
+Macro definitions (`#define`)
+
+```haskell
+#define STRINGIFY(x) #x
+f = STRINGIFY (y)
+```
+
+Escaped newlines
+
+```haskell
+#define LONG_MACRO_DEFINITION \
+  data Pair a b = Pair \
+    { first :: a \
+    , second :: b \
+    }
+#define SHORT_MACRO_DEFINITION \
+  x
 ```

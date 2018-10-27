@@ -13,6 +13,7 @@ module HIndent.Types
   ,runPrinter
   ,doDeferredComments
   ,Config(..)
+  ,readExtension
   ,defaultConfig
   ,NodeInfo(..)
   ,NodeComment(..)
@@ -29,7 +30,7 @@ import           Data.Int (Int64)
 import           Data.Maybe
 import           Data.Yaml (FromJSON(..))
 import qualified Data.Yaml as Y
-import           Language.Haskell.Exts.SrcLoc
+import           Language.Haskell.Exts hiding (Style, prettyPrint, Pretty, style, parse)
 
 -- | A pretty printing monad.
 newtype Printer a =
@@ -80,7 +81,17 @@ data Config = Config
     , configTrailingNewline :: !Bool -- ^ End with a newline.
     , configSortImports :: !Bool -- ^ Sort imports in groups.
     , configLineBreaks :: [String] -- ^ Break line when meets these operators.
+    , configExtensions :: [Extension]
+      -- ^ Extra language extensions enabled by default.
     }
+
+-- | Parse an extension.
+readExtension :: Monad m => String -> m Extension
+readExtension x =
+  case classifyExtension x -- Foo
+       of
+    UnknownExtension _ -> fail ("Unknown extension: " ++ x)
+    x' -> return x'
 
 instance FromJSON Config where
   parseJSON (Y.Object v) =
@@ -99,7 +110,9 @@ instance FromJSON Config where
         (v Y..:? "sort-imports") <*>
       fmap
         (fromMaybe (configLineBreaks defaultConfig))
-        (v Y..:? "line-breaks")
+        (v Y..:? "line-breaks") <*>
+      (traverse readExtension
+        =<< fmap (fromMaybe []) (v Y..:? "extensions"))
   parseJSON _ = fail "Expected Object for Config value"
 
 -- | Default style configuration.
@@ -111,6 +124,7 @@ defaultConfig =
     , configTrailingNewline = True
     , configSortImports = True
     , configLineBreaks = []
+    , configExtensions = []
     }
 
 -- | Some comment to print.
