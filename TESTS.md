@@ -1101,6 +1101,84 @@ fun x =
     returnA -< y
 ```
 
+Long arrow 1
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc x -> do
+    y <-
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -<
+        x
+    returnA -< y
+```
+
+Long arrow 2
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -> do
+    y <-
+      a -<
+        xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    returnA -< y
+```
+
+Long arrow 3
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc x -> do
+    yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy <-
+      a -< x
+    returnA -<
+      yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+```
+
+Long arrow app 1
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc x -> do
+    y <-
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -<<
+        x
+    returnA -<< y
+```
+
+Long arrow app 2
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -> do
+    y <-
+      a -<<
+        xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    returnA -<< y
+```
+
+Long arrow app 3
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc x -> do
+    yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy <-
+      a -<< x
+    returnA -<<
+      yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+```
+
 Arrow inside let
 
 ```haskell

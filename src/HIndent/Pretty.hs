@@ -702,9 +702,15 @@ exp x@XChildTag{} = pretty' x
 exp x@CorePragma{} = pretty' x
 exp x@SCCPragma{} = pretty' x
 exp x@GenPragma{} = pretty' x
-exp x@LeftArrApp{} = pretty' x
+exp (LeftArrApp _ e1 e2) = mightSwingExp (do
+    pretty e1
+    write " -<"
+    ) e2
 exp x@RightArrApp{} = pretty' x
-exp x@LeftArrHighApp{} = pretty' x
+exp (LeftArrHighApp _ e1 e2) = mightSwingExp (do
+    pretty e1
+    write " -<<"
+    ) e2
 exp x@RightArrHighApp{} = pretty' x
 exp x@ParArray{} = pretty' x
 exp x@ParArrayFromTo{} = pretty' x
