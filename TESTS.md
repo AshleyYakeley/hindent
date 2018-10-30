@@ -415,6 +415,18 @@ Type family dependencies
 type family Id a = r | r -> a
 ```
 
+Type family dependencies with kinds (Type)
+
+```haskell
+type family Id (a :: Type) = (r :: Type) | r -> a
+```
+
+Type family dependencies with kinds (*)
+
+```haskell
+type family Id (a :: *) = (r :: *) | r -> a
+```
+
 Binding implicit parameters
 
 ```haskell
@@ -523,6 +535,69 @@ class Foo a where
   bar :: a -> a -> a
   default bar :: Monoid a => a -> a -> a
   bar = mappend
+```
+
+Class associated type
+
+```haskell
+class Foo a where
+  type Bar a
+```
+
+Class associated type (Type)
+
+```haskell
+class Foo a where
+  type Bar a :: Type
+```
+
+Class associated type (*)
+
+```haskell
+class Foo a where
+  type Bar a :: *
+```
+
+Class associated type with dependency
+
+```haskell
+class Foo a where
+  type Bar a = bar | bar -> a
+```
+
+Class associated type with dependency (1)
+
+```haskell
+class Foo a where
+  type Bar a b = bar | bar -> a
+```
+
+Class associated type with dependency (2)
+
+```haskell
+class Foo a where
+  type Bar a b = bar | bar -> b
+```
+
+Class associated type with dependency (3)
+
+```haskell
+class Foo a where
+  type Bar a b = bar | bar -> a b
+```
+
+Class associated type with dependency and kind (Type)
+
+```haskell
+class Foo a where
+  type Bar (a :: Type) (b :: Type) = (bar :: Type) | bar -> a b
+```
+
+Class associated type with dependency and kind (*)
+
+```haskell
+class Foo a where
+  type Bar (a :: *) (b :: *) = (bar :: *) | bar -> a b
 ```
 
 Implicit parameters

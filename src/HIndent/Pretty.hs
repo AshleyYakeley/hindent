@@ -16,7 +16,7 @@ module HIndent.Pretty
 import           Control.Applicative
 import           Control.Monad.State.Strict hiding (state)
 import qualified Data.ByteString.Builder as S
-import           Data.Foldable (for_, forM_, traverse_)
+import           Data.Foldable (for_, forM_)
 import           Data.Int
 import           Data.List
 import           Data.Maybe
@@ -752,6 +752,16 @@ instance Pretty QualStmt where
 instance Pretty Decl where
   prettyInternal = decl'
 
+writeResultSig :: ResultSig NodeInfo -> Printer ()
+writeResultSig r = do
+  space
+  let sep = case r of
+              KindSig _ _ -> "::"
+              TyVarSig _ _ -> "="
+  writeDefer sep
+  space
+  pretty r
+
 -- | Render a declaration.
 decl ::  Decl NodeInfo -> Printer ()
 decl (InstDecl _ moverlap dhead decls) =
@@ -786,16 +796,7 @@ decl (TypeDecl _ typehead typ') = do
 decl (TypeFamDecl _ declhead result injectivity) = do
   write "type family "
   pretty declhead
-  case result of
-    Just r -> do
-      space
-      let sep = case r of
-                  KindSig _ _ -> "::"
-                  TyVarSig _ _ -> "="
-      writeDefer sep
-      space
-      pretty r
-    Nothing -> return ()
+  for_ result writeResultSig
   case injectivity of
     Just i -> do
       space
@@ -804,14 +805,7 @@ decl (TypeFamDecl _ declhead result injectivity) = do
 decl (ClosedTypeFamDecl _ declhead result injectivity instances) = do
   write "type family "
   pretty declhead
-  for_ result $ \r -> do
-    space
-    let sep = case r of
-                KindSig _ _ -> "::"
-                TyVarSig _ _ -> "="
-    writeDefer sep
-    space
-    pretty r
+  for_ result writeResultSig
   for_ injectivity $ \i -> do
     space
     pretty i
@@ -1029,20 +1023,16 @@ instance Pretty ClassDecl where
   prettyInternal x =
     case x of
       ClsDecl _ d -> pretty d
-      ClsDataFam _ ctx h mkind ->
+      ClsDataFam _ ctx h mrsig ->
         depend (write "data ")
                (withCtx ctx
                         (do pretty h
-                            (case mkind of
-                               Nothing -> return ()
-                               Just kind ->
-                                 do write " :: "
-                                    pretty kind)))
-      ClsTyFam _ h mkind minj ->
+                            (for_ mrsig writeResultSig)))
+      ClsTyFam _ h mrsig minj ->
         depend (write "type ")
                (depend (pretty h)
-                       (depend (traverse_ (\kind -> write " :: " >> pretty kind) mkind)
-                               (traverse_ pretty minj)))
+                       (depend (for_ mrsig writeResultSig)
+                               (for_ minj (\inj -> space >> pretty inj))))
       ClsTyDef _ (TypeEqn _ this that) ->
         do write "type "
            pretty this
