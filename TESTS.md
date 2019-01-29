@@ -515,6 +515,22 @@ f :: (a :?: b) => (a, b)
 f' :: ((:?:) a b) => (a, b)
 ```
 
+Quantified constraint in class
+
+```haskell
+{-# LANGUAGE QuantifiedConstraints #-}
+
+class (forall a. Eq (f a)) => Class f
+```
+
+Quantified constraint in instance
+
+```haskell
+{-# LANGUAGE QuantifiedConstraints #-}
+
+instance (forall a. Eq (f a)) => Class f
+```
+
 Tuples
 
 ``` haskell

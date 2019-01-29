@@ -1,8 +1,9 @@
-resolver: lts-12.22
+resolver: lts-13.5
 packages:
 - '.'
 
 extra-deps:
-- haskell-src-exts-1.21.0
+- git: https://github.com/AshleyYakeley/haskell-src-exts.git
+  commit: 38e3f450811874c8c6a8a2fecb4ad9e0dca9ff0d
 
 allow-newer: True
