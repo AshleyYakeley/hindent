@@ -616,6 +616,48 @@ class Foo a where
   type Bar (a :: *) (b :: *) = (bar :: *) | bar -> a b
 ```
 
+Kind signature
+
+```haskell
+foo :: forall (a :: Type). a
+foo = undefined
+```
+
+Kind signature with forall
+
+```haskell
+foo :: forall (a :: forall k. k -> Type). a Maybe
+foo = undefined
+```
+
+Kind signature parenthesised with forall
+
+```haskell
+foo :: forall (a :: (forall k. k -> Type)). a Maybe
+foo = undefined
+```
+
+Type signature with internal forall
+
+```haskell
+foo :: Int -> forall k. k -> Int
+foo = undefined
+```
+
+Kind signature with internal forall
+
+```haskell
+foo :: forall (a :: Type -> forall k. k -> Type). a Int Maybe
+foo = undefined
+```
+
+Kind signature parenthesised with internal forall
+
+```haskell
+foo :: forall (a :: (Type -> forall k. k -> Type)). a Int Maybe
+foo = undefined
+```
+
 Implicit parameters
 
 ```haskell

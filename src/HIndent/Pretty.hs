@@ -1489,7 +1489,11 @@ instance Pretty QOp where
   prettyInternal = pretty'
 
 instance Pretty TyVarBind where
-  prettyInternal = pretty'
+  prettyInternal (UnkindedVar _ name) = pretty name
+  prettyInternal (KindedVar _ name ty) = parens $ do
+    pretty name
+    write " :: "
+    pretty ty
 
 instance Pretty ModuleHead where
   prettyInternal (ModuleHead _ name mwarnings mexports) =
