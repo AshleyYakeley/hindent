@@ -1027,7 +1027,7 @@ instance Pretty ClassDecl where
            pretty that
       ClsDefSig _ name ty ->
         do write "default "
-           pretty name
+           prettyTopName name
            swing (writeDefer " ::") $ pretty ty
 
 instance Pretty ConDecl where

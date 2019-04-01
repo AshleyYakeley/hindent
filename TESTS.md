@@ -345,6 +345,15 @@ Operator in parentheses
 cat = (++)
 ```
 
+Operator in parentheses in class
+
+```haskell
+class C a where
+  (<.>) :: a -> a -> a
+  default (<.>) :: a -> a -> a
+  (<.>) _ x = x
+```
+
 Symbol data constructor in parentheses
 
 ```haskell
