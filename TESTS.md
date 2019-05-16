@@ -471,6 +471,36 @@ Type brackets
 foo :: $([t|Bool|]) -> a
 ```
 
+Splice
+
+```haskell
+s = $splice
+```
+
+Splice parent
+
+```haskell
+s = $(splice)
+```
+
+Typed splice
+
+```haskell pending
+s = $$splice
+```
+
+Typed paren splice
+
+```haskell
+s = $$(splice)
+```
+
+Typed expression
+
+```haskell
+add1 x = [||x + 1||]
+```
+
 Quoted data constructors
 
 ```haskell

@@ -1156,6 +1156,9 @@ instance Pretty Splice where
       ParenSplice _ e ->
         depend (write "$")
                (parens (pretty e))
+      TParenSplice _ e ->
+        depend (write "$$")
+               (parens (pretty e))
 
 instance Pretty InstRule where
   prettyInternal (IParen _ rule) = parens $ pretty rule
@@ -1379,6 +1382,7 @@ instance Pretty Bracket where
   prettyInternal x =
     case x of
       ExpBracket _ p -> quotation "" (pretty p)
+      TExpBracket _ p -> tquotation (pretty p)
       PatBracket _ p -> quotation "p" (pretty p)
       TypeBracket _ ty -> quotation "t" (pretty ty)
       d@(DeclBracket _ _) -> pretty' d
@@ -2083,3 +2087,11 @@ quotation quoter body =
            write "|")
        (do body
            write "|"))
+
+tquotation :: Printer () -> Printer ()
+tquotation body =
+  brackets
+    (depend
+       (write "||")
+       (do body
+           write "||"))
