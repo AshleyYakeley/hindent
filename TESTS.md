@@ -1056,7 +1056,7 @@ gamma = do
 
 Doesn't work yet (wrong comment position detection)
 
-```haskell pending
+```haskell
 gamma = do
   -- in the beginning of a do-block
   delta

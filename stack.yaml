@@ -7,3 +7,6 @@ extra-deps:
   commit: 3db0902446d8aabdda5eb965684312ed22c075ad
 
 allow-newer: True
+
+ghc-options:
+    "$locals": -Werror

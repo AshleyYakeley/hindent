@@ -964,6 +964,7 @@ instance Pretty DerivStrategy where
       DerivStock _ -> return ()
       DerivAnyclass _ -> write "anyclass"
       DerivNewtype _ -> write "newtype"
+      DerivVia _ ty -> write "via " >> pretty ty
 
 instance Pretty Alt where
   prettyInternal x =
