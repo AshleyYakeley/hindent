@@ -1119,7 +1119,11 @@ instance Pretty QualConDecl where
                        (pretty d))
 
 instance Pretty GadtDecl where
+#if MIN_VERSION_haskell_src_exts(1,21,0)
   prettyInternal (GadtDecl _ name _ _ fields t) =
+#else
+  prettyInternal (GadtDecl _ name fields t) =
+#endif
     horVar `ifFitsOnOneLineOrElse` verVar
     where
       fields' p =
@@ -1425,6 +1429,11 @@ instance Pretty DataOrNew where
 instance Pretty FunDep where
   prettyInternal = pretty'
 
+#if !MIN_VERSION_haskell_src_exts(1,21,0)
+instance Pretty Kind where
+  prettyInternal = pretty'
+#endif
+
 instance Pretty ResultSig where
   prettyInternal (KindSig _ kind) = pretty kind
   prettyInternal (TyVarSig _ tyVarBind) = pretty tyVarBind
@@ -1721,7 +1730,6 @@ typ (TyForall _ mbinds ctx ty) =
                  write ".")
          (do indentSpaces <- getIndentSpaces
              withCtx ctx (indented indentSpaces (pretty ty)))
-typ (TyStar _) = write "*"
 typ (TyFun _ a b) =
   depend (do pretty a
              write " -> ")
@@ -1796,6 +1804,9 @@ typ (TyWildCard _ name) =
          pretty n
 typ (TyQuasiQuote _ n s) = quotation n (string s)
 typ (TyUnboxedSum{}) = error "FIXME: No implementation for TyUnboxedSum."
+#if MIN_VERSION_haskell_src_exts(1,21,0)
+typ (TyStar _) = write "*"
+#endif
 
 prettyTopName :: Name NodeInfo -> Printer ()
 prettyTopName x@Ident{} = pretty x
