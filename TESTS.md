@@ -485,7 +485,7 @@ s = $(splice)
 
 Typed splice
 
-```haskell pending
+```haskell
 s = $$splice
 ```
 

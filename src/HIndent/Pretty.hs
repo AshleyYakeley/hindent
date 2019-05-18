@@ -1154,6 +1154,9 @@ instance Pretty Splice where
       IdSplice _ str ->
         do write "$"
            string str
+      TIdSplice _ str ->
+        do write "$$"
+           string str
       ParenSplice _ e ->
         depend (write "$")
                (parens (pretty e))
