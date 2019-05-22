@@ -1097,6 +1097,7 @@ Comments around regular declarations
 
 ``` haskell
 -- This is some random comment.
+
 -- | Main entry point.
 main = putStrLn "Hello, World!"
 -- This is another random comment.
@@ -1258,6 +1259,36 @@ Etc.
 -}
 main = putStrLn "Hello, World!"
 {- This is another random comment. -}
+```
+
+Multiple line haddock comments
+
+``` haskell
+-- | A
+-- B
+-- C
+f = 1
+-- D
+-- E
+```
+
+Multiple line haddock comments with gaps
+
+``` haskell
+-- A
+-- B
+-- C
+
+-- $ P
+-- Q
+-- R
+
+-- | 1
+-- 2
+-- 3
+f = 1
+-- D
+-- E
 ```
 
 # Arrow syntax

@@ -174,6 +174,7 @@ runPrinterStyle config m =
               { psIndentLevel = 0
               , psOutput = mempty
               , psNewline = False
+              , psComment = False
               , psColumn = 0
               , psLine = 1
               , psConfig = config

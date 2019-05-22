@@ -46,6 +46,8 @@ data PrintState = PrintState
     -- ^ The current output bytestring builder.
   , psNewline :: !Bool
     -- ^ Just outputted a newline?
+  , psComment :: !Bool
+    -- ^ Just outputted a comment?
   , psColumn :: !Int64
     -- ^ Current column.
   , psLine :: !Int64

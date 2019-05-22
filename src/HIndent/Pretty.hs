@@ -54,9 +54,18 @@ pretty a = do
        case c' of
          CommentBeforeLine _ c -> do
            case c of
+             EndOfLine s@(' ':'|':_) -> do
+              cc <- gets psComment
+              when cc newline
+              write ("--" ++ s)
+             EndOfLine s@(' ':'$':_) -> do
+              cc <- gets psComment
+              when cc newline
+              write ("--" ++ s)
              EndOfLine s -> write ("--" ++ s)
              MultiLine s -> write ("{-" ++ s ++ "-}")
            newline
+           modify (\s -> s { psComment = True })
          _ -> return ())
     comments
   prettyInternal a
@@ -271,6 +280,7 @@ writeDefer x =
      modify (\s ->
                s {psOutput = psOutput state <> S.stringUtf8 out
                  ,psNewline = False
+                 ,psComment = False
                  ,psLine = psLine state + fromIntegral additionalLines
                  ,psEolComment= False
                  ,psColumn = psColumn'})
