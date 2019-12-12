@@ -19,15 +19,9 @@ cache:
 
 matrix:
   include:
-  - env: RESOLVER=lts-7
+  - env: RESOLVER=lts-14
     os: linux
-  - env: RESOLVER=lts-9
-    os: linux
-  - env: RESOLVER=lts-11
-    os: linux
-  - env: RESOLVER=lts-12
-    os: linux
-  - env: RESOLVER=lts-12
+  - env: RESOLVER=lts-14
     os: osx
 
 before_install:

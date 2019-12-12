@@ -21,7 +21,8 @@ module HIndent.Types
   ) where
 
 import           Control.Applicative
-import           Control.Monad
+import           Control.Monad hiding (fail)
+import           Control.Monad.Fail
 import           Control.Monad.State.Strict (MonadState(..),StateT,gets,modify)
 import           Control.Monad.Trans.Maybe
 import           Data.ByteString.Builder
@@ -31,6 +32,7 @@ import           Data.Maybe
 import           Data.Yaml (FromJSON(..))
 import qualified Data.Yaml as Y
 import           Language.Haskell.Exts hiding (Style, prettyPrint, Pretty, style, parse)
+import           Prelude hiding (fail)
 
 -- | A pretty printing monad.
 newtype Printer a =
@@ -88,7 +90,7 @@ data Config = Config
     }
 
 -- | Parse an extension.
-readExtension :: Monad m => String -> m Extension
+readExtension :: MonadFail m => String -> m Extension
 readExtension x =
   case classifyExtension x -- Foo
        of

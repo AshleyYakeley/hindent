@@ -30,7 +30,6 @@ import qualified System.Directory as IO
 import           System.Exit (exitWith)
 import qualified System.IO as IO
 import           Options.Applicative hiding (action, style)
-import           Data.Monoid ((<>))
 import qualified Data.Text as T
 
 data Action = Validate | Reformat
