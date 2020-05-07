@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: haskell-src-exts-1.22.0@sha256:f558923a9c8f57402c33a8cc871b934027a5c65414404c87239f6cbd7357d54e,4541
+    hackage: haskell-src-exts-1.23.0@sha256:1bb9f7e97d569e56973133cb075fdcc1bfd11f90d94b035b5cf44814bb39a73d,4541
     pantry-tree:
-      size: 96940
-      sha256: 597b6f48bd409a4d0da013c4e356945c42e0d098966035d3aa68cd4a3ccd66c9
+      size: 97804
+      sha256: 8e5bc885533431db9bf75e9609f6b80b56ab0c289a903d701f8628e78322afd0
   original:
-    hackage: haskell-src-exts-1.22.0
+    hackage: haskell-src-exts-1.23.0
 snapshots:
 - completed:
     size: 525663

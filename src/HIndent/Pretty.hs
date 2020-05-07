@@ -721,6 +721,7 @@ exp (LeftArrHighApp _ e1 e2) = mightSwingExp (do
     write " -<<"
     ) e2
 exp x@RightArrHighApp{} = pretty' x
+exp (ArrOp _ e) = wrap "(|" "|)" (pretty e)
 exp x@ParArray{} = pretty' x
 exp x@ParArrayFromTo{} = pretty' x
 exp x@ParArrayFromThenTo{} = pretty' x

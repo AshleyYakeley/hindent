@@ -1395,6 +1395,17 @@ fun2 x = let
   in arr1 x
 ```
 
+Arrow operator
+
+```haskell
+{-# LANGUAGE Arrows #-}
+
+myarrow =
+  proc x -> do
+    y <- a -< x
+    (|myop|)
+```
+
 # Regression tests
 
 jml Adds trailing whitespace when wrapping #221

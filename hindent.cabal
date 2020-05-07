@@ -39,7 +39,7 @@ library
                    , Cabal
                    , filepath
                    , directory
-                   , haskell-src-exts >= 1.21
+                   , haskell-src-exts >= 1.23
                    , monad-loops
                    , mtl
                    , bytestring
