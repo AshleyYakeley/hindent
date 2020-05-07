@@ -3,7 +3,8 @@ packages:
 - '.'
 
 extra-deps:
-- haskell-src-exts-1.23.0
+- git: https://github.com/AshleyYakeley/haskell-src-exts.git
+  commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
 
 allow-newer: True
 

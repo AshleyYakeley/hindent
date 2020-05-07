@@ -400,6 +400,26 @@ list =
   ]
 ```
 
+Type family trivial
+
+```haskell
+type family T
+```
+
+Type family closed
+
+```haskell
+type family Id a where
+  Id x = x
+```
+
+Type family closed empty
+
+```haskell
+type family Id a where
+
+```
+
 Type families
 
 ```haskell

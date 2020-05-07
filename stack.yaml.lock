@@ -5,12 +5,16 @@
 
 packages:
 - completed:
-    hackage: haskell-src-exts-1.23.0@sha256:1bb9f7e97d569e56973133cb075fdcc1bfd11f90d94b035b5cf44814bb39a73d,4541
+    name: haskell-src-exts
+    version: 1.23.0
+    git: https://github.com/AshleyYakeley/haskell-src-exts.git
     pantry-tree:
-      size: 97804
-      sha256: 8e5bc885533431db9bf75e9609f6b80b56ab0c289a903d701f8628e78322afd0
+      size: 98738
+      sha256: 7a072171e66e87e3051fb4d9508b93c731e30c07d1e86aa77fb7fe103b5380bd
+    commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
   original:
-    hackage: haskell-src-exts-1.23.0
+    git: https://github.com/AshleyYakeley/haskell-src-exts.git
+    commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
 snapshots:
 - completed:
     size: 494638
