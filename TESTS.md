@@ -417,7 +417,6 @@ Type family closed empty
 
 ```haskell
 type family Id a where
-
 ```
 
 Type families

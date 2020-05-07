@@ -821,8 +821,9 @@ decl (ClosedTypeFamDecl _ declhead result injectivity instances) = do
     pretty i
   space
   writeDefer "where"
-  newline
-  indentedBlock (lined (map pretty instances))
+  unless (null instances)
+         (do newline
+             indentedBlock (lined (map pretty instances)))
 decl (DataDecl _ dataornew ctx dhead condecls mderivs) =
   do depend (do pretty dataornew
                 space)
