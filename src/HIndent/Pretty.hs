@@ -789,6 +789,12 @@ decl (TypeSig _ names ty) =
                    (map pretty names)
              write " :: ")
          (pretty ty)
+decl (TypeKindSig _ names ty) =
+  depend (do write "type "
+             inter (write ", ")
+                   (map pretty names)
+             write " :: ")
+         (pretty ty)
 decl (FunBind _ matches) =
   lined (map pretty matches)
 decl (ClassDecl _ ctx dhead fundeps decls) =
@@ -1272,6 +1278,7 @@ instance Pretty Module where
                             ,interOf newline
                                      (map (\case
                                              r@TypeSig{} -> (1,pretty r)
+                                             r@TypeKindSig{} -> (1,pretty r)
                                              r@InlineSig{} -> (1, pretty r)
                                              r -> (2,pretty r))
                                           decls))])
@@ -1723,6 +1730,10 @@ context ctx =
       write ")"
     CxEmpty _ -> parens (return ())
 
+quantvis :: QuantVisibility -> Printer ()
+quantvis InvisibleQuantification = write "."
+quantvis VisibleQuantification = write " ->"
+
 typ :: Type NodeInfo -> Printer ()
 typ (TyTuple _ Boxed types) = do
   let horVar = parens $ inter (write ", ") (map pretty types)
@@ -1732,13 +1743,13 @@ typ (TyTuple _ Unboxed types) = do
   let horVar = wrap "(# " " #)" $ inter (write ", ") (map pretty types)
   let verVar = wrap "(#" " #)" $ prefixedLined "," (map (depend space . pretty) types)
   horVar `ifFitsOnOneLineOrElse` verVar
-typ (TyForall _ mbinds ctx ty) =
+typ (TyForall _ mbinds qv ctx ty) =
         (case mbinds of
             Nothing -> id
             Just ts -> swing $
               do write "forall "
                  spaced (map pretty ts)
-                 write ".")
+                 quantvis qv)
          (do indentSpaces <- getIndentSpaces
              withCtx ctx (indented indentSpaces (pretty ty)))
 typ (TyFun _ a b) =
@@ -1875,7 +1886,7 @@ decl' e = decl e
 declTy :: Type NodeInfo -> Printer ()
 declTy dty =
   case dty of
-    TyForall _ mbinds mctx ty ->
+    TyForall _ mbinds qv mctx ty ->
       case mbinds of
         Nothing -> do
           case mctx of
@@ -1892,7 +1903,7 @@ declTy dty =
         Just ts -> do
           write "forall "
           spaced (map pretty ts)
-          write "."
+          quantvis qv
           case mctx of
             Nothing -> do
               mst <- fitsOnOneLine (space >> prettyTy False ty)

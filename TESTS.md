@@ -716,6 +716,38 @@ foo :: forall (a :: (Type -> forall k. k -> Type)). a Int Maybe
 foo = undefined
 ```
 
+Dependent visible kind signature
+
+```haskell
+foo :: forall (a :: Type -> forall k -> k -> Type). a Int Maybe
+foo = undefined
+```
+
+Explicit type kind signature
+
+```haskell
+type F :: Type -> Type
+type F x = x
+```
+
+Explicit data kind signature
+
+```haskell
+type F :: Type -> Type
+data F x =
+  MkF x
+```
+
+Explicit kind signatures
+
+```haskell
+type F, G :: Type -> Type
+type F x = x
+
+data G x =
+  MkG x
+```
+
 Implicit parameters
 
 ```haskell
