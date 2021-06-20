@@ -566,11 +566,19 @@ class Class a where
   fun = id
 ```
 
+Equality constraint
+
+```haskell
+f :: (a ~ b) => (a, b)
+f' :: a ~ b => (a, b)
+```
+
 Symbol class constructor in class constraint
 
 ```haskell
 f :: (a :?: b) => (a, b)
 f' :: ((:?:) a b) => (a, b)
+f'' :: a :?: b => (a, b)
 ```
 
 Quantified constraint in class
