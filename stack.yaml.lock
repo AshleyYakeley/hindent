@@ -6,15 +6,15 @@
 packages:
 - completed:
     name: haskell-src-exts
-    version: 1.23.0
+    version: 1.23.1
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
     pantry-tree:
-      size: 98738
-      sha256: 7a072171e66e87e3051fb4d9508b93c731e30c07d1e86aa77fb7fe103b5380bd
-    commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
+      size: 98740
+      sha256: d50d2cd982bed8deaa8a8608e9062558ecccffc22d24b1b6b421041c32fd4238
+    commit: a2225286fa8349de93b4c0ccc85b8cae8c5d8d05
   original:
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
-    commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
+    commit: a2225286fa8349de93b4c0ccc85b8cae8c5d8d05
 snapshots:
 - completed:
     size: 494638

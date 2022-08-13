@@ -783,6 +783,12 @@ decl (InstDecl _ moverlap dhead decls) =
      unless (null (fromMaybe [] decls))
             (do newline
                 indentedBlock (lined (map pretty (fromMaybe [] decls))))
+decl (TypeInsDecl _ dhead dbody) =
+  depend (write "type instance ")
+    (depend (pretty dhead) (do
+        write " = "
+        pretty dbody
+        ))
 decl (SpliceDecl _ e) = pretty e
 decl (TypeSig _ names ty) =
   depend (do inter (write ", ")

@@ -4,7 +4,7 @@ packages:
 
 extra-deps:
 - git: https://github.com/AshleyYakeley/haskell-src-exts.git
-  commit: 8cb68def2563e2ebcbdcbec688b326b9f3fa1dd7
+  commit: a2225286fa8349de93b4c0ccc85b8cae8c5d8d05
 
 allow-newer: True
 

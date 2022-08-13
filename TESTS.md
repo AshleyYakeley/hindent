@@ -1522,6 +1522,14 @@ instance forall x. C
 instance forall x. Show x => C x
 ```
 
+explicit forall in type instances
+
+``` haskell
+type instance forall x. F x = x
+
+type instance forall (x :: Type). F (Maybe x) = x
+```
+
 tfausak support shebangs #208
 
 ``` haskell given
