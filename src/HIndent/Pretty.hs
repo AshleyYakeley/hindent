@@ -1623,10 +1623,6 @@ stmt (Generator _ p e) =
   do pretty p
      mightSwingExp (write " <-") e
 stmt x = case x of
-           Generator _ p e ->
-             depend (do pretty p
-                        write " <- ")
-                    (pretty e)
            Qualifier _ e -> pretty e
            LetStmt _ binds ->
              swing (writeDefer "let")
