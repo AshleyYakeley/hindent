@@ -19,6 +19,7 @@ import Distribution.PackageDescription.Parsec
 #else
 import Distribution.PackageDescription.Parse
 #endif
+import Distribution.Utils.Path
 import Language.Haskell.Extension
 import qualified Language.Haskell.Exts.Extension as HSE
 import System.Directory
@@ -44,7 +45,7 @@ mkStanza bi mnames fpaths =
   MkStanza bi $ \path -> let
     modpaths = fmap toFilePath $ otherModules bi ++ mnames
     inDir dir =
-      case toRelative dir path of
+      case toRelative (getSymbolicPath dir) path of
         Nothing -> False
         Just relpath ->
           any (equalFilePath $ dropExtension relpath) modpaths ||
