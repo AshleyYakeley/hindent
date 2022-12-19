@@ -5,15 +5,15 @@
 
 packages:
 - completed:
-    commit: 9e51d98cb3a908eec8817e3694842ddf2fd8348b
+    commit: d1a86659a8c5d9526b9b23b6ba9538f5aed2e4a7
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
     name: haskell-src-exts
     pantry-tree:
-      sha256: 7d25223e2f7d3676d3d7122e862ea8d1ada9e37841dde620536c0d252234dbdd
+      sha256: c06acb38a6de423dfd52ffd5ad88e6ddccdb76ae860947110e7c180ec45ef0fa
       size: 98740
     version: 1.23.1
   original:
-    commit: 9e51d98cb3a908eec8817e3694842ddf2fd8348b
+    commit: d1a86659a8c5d9526b9b23b6ba9538f5aed2e4a7
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
 snapshots:
 - completed:
