@@ -17,6 +17,20 @@ Extension pragmas
 fun @Int 12
 ```
 
+TypeApplications
+
+```haskell
+{-# LANGUAGE TypeApplications #-}
+
+\(MkX) -> 12
+```
+
+```haskell
+{-# LANGUAGE TypeApplications #-}
+
+\(MkX @Int) -> 12
+```
+
 Module header
 
 ``` haskell

@@ -433,6 +433,7 @@ instance Pretty Pat where
       PVar{} -> pretty' x
       PUnboxedSum{} -> pretty' x
       PSplice{} -> pretty' x
+      PTypeApp{} -> pretty' x
 
 -- | Pretty infix application of a name (identifier or symbol).
 prettyInfixName :: Name NodeInfo -> Printer ()
