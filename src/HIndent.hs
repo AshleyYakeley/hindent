@@ -19,6 +19,7 @@ module HIndent
   )
   where
 
+import           Control.Monad
 import           Control.Monad.State.Strict
 import           Control.Monad.Trans.Maybe
 import           Data.ByteString (ByteString)
