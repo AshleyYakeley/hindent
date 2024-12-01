@@ -986,7 +986,7 @@ instance Pretty Deriving where
 instance Pretty DerivStrategy where
   prettyInternal x =
     case x of
-      DerivStock _ -> return ()
+      DerivStock _ -> write "stock"
       DerivAnyclass _ -> write "anyclass"
       DerivNewtype _ -> write "newtype"
       DerivVia _ ty -> write "via " >> pretty ty
