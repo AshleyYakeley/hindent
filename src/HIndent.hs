@@ -68,15 +68,15 @@ reformat config mexts mfilepath =
                        Nothing -> mode'
                        Just (Nothing, exts') ->
                          mode' { extensions =
-                                   exts'
-                                   ++ configExtensions config
-                                   ++ extensions mode' }
+                                   configExtensions config
+                                   ++ extensions mode'
+                                   ++ exts' }
                        Just (Just lang, exts') ->
                          mode' { baseLanguage = lang
                                , extensions =
-                                   exts'
-                                   ++ configExtensions config
-                                   ++ extensions mode' }
+                                   configExtensions config
+                                   ++ extensions mode'
+                                   ++ exts' }
         in case parseModuleWithComments mode'' (UTF8.toString code) of
                ParseOk (m, comments) ->
                    fmap

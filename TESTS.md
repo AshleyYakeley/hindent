@@ -68,8 +68,8 @@ Import lists
 ``` haskell
 import Data.Text
 import Data.Text
-import qualified Data.Text as T
-import qualified Data.Text (a, b, c)
+import Data.Text qualified as T
+import Data.Text qualified (a, b, c)
 import Data.Text (a, b, c)
 import Data.Text hiding (a, b, c)
 ```
@@ -89,11 +89,11 @@ import B
 Explicit imports - capitals first (typeclasses/types), then operators, then identifiers
 
 ```haskell given
-import qualified MegaModule as M ((>>>), MonadBaseControl, void, MaybeT(..), join, Maybe(Nothing, Just), liftIO, Either, (<<<), Monad(return, (>>=), (>>)))
+import MegaModule qualified as M ((>>>), MonadBaseControl, void, MaybeT(..), join, Maybe(Nothing, Just), liftIO, Either, (<<<), Monad(return, (>>=), (>>)))
 ```
 
 ```haskell expect
-import qualified MegaModule as M
+import MegaModule qualified as M
   ( Either
   , Maybe(Just, Nothing)
   , MaybeT(..)
@@ -105,6 +105,20 @@ import qualified MegaModule as M
   , liftIO
   , void
   )
+```
+
+Import qualified post
+
+```haskell
+import A qualified as M
+```
+
+Import qualified pre
+
+```haskell
+{-# LANGUAGE NoImportQualifiedPost #-}
+
+import qualified A as M
 ```
 
 Pretty import specification
@@ -122,7 +136,7 @@ import A hiding
 
 import Name hiding ()
 
-import {-# SOURCE #-} safe qualified Module as M hiding (a, b, c, d, e, f)
+import {-# SOURCE #-} safe Module qualified as M hiding (a, b, c, d, e, f)
 ```
 
 # Declarations
@@ -1649,7 +1663,7 @@ ttuegel qualified infix sections get mangled #273
 
 ```haskell
 -- https://github.com/chrisdone/hindent/issues/273
-import qualified Data.Vector as V
+import Data.Vector qualified as V
 
 main :: IO ()
 main = do
@@ -2083,7 +2097,7 @@ cdsmith Quotes are dropped from package imports #480
 -- https://github.com/commercialhaskell/hindent/issues/480
 {-# LANGUAGE PackageImports #-}
 
-import qualified "base" Prelude as P
+import "base" Prelude qualified as P
 ```
 
 # MINIMAL pragma

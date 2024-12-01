@@ -1559,12 +1559,15 @@ instance Pretty ImportDecl where
     write "import"
     when source $ write " {-# SOURCE #-}"
     when safe $ write " safe"
-    when qualified $ write " qualified"
+    when (qualified == Just False) $ write " qualified"
     case mpkg of
       Nothing -> return ()
       Just pkg -> space >> write ("\"" ++ pkg ++ "\"")
     space
     pretty name
+    when (qualified == Just True) $ do
+      space
+      write "qualified"
     case mas of
       Nothing -> return ()
       Just asName -> do
