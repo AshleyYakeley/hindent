@@ -1245,6 +1245,11 @@ instance Pretty DeclHead where
         depend (pretty dhead)
                (do space
                    pretty var)
+      DHTypeApp _ dhead var ->
+        depend (pretty dhead)
+               (do space
+                   write "@"
+                   pretty var)
 
 instance Pretty Overlap where
   prettyInternal (Overlap _) = write "{-# OVERLAP #-}"
@@ -1770,6 +1775,7 @@ typ (TyParArray _ t) =
                pretty t
                write ":")
 typ (TyApp _ f a) = spaced [pretty f, pretty a]
+typ (TyTypeApp _ f a) = spaced [pretty f, write "@" >> pretty a]
 typ (TyVar _ n) = pretty n
 typ (TyCon _ p) = pretty p
 typ (TyParen _ e) = parens (pretty e)

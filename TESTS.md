@@ -838,6 +838,37 @@ c :: '(:->) 'True 'False
 d :: (:->) 'True 'False
 ```
 
+# Type abstractions
+
+Type abstractions in patterns
+
+```haskell
+{-# LANGUAGE TypeAbstractions #-}
+
+test :: Foo -> String
+test x =
+  case x of
+    Foo @t -> show @t 0
+```
+
+Type abstractions in functions
+
+```haskell
+{-# LANGUAGE TypeAbstractions #-}
+
+id :: forall a. a -> a
+id @t x = x :: t
+```
+
+Type abstractions in type declarations
+
+```haskell
+{-# LANGUAGE TypeAbstractions #-}
+
+type Some :: forall k. (k -> Type) -> Type
+type Some @k = SomeFor @k (Const ())
+```
+
 # Function declarations
 
 Prefix notation for operators

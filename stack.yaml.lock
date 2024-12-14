@@ -5,19 +5,19 @@
 
 packages:
 - completed:
-    commit: 04451a2de42c21d690d55f8a6b77939dc911cf16
+    commit: 8a1591253734e1a716d2b0327e438f2bcb1c9890
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
     name: haskell-src-exts
     pantry-tree:
-      sha256: ce7dc3a4190a488c77c7e6d513f1c5c8fc2b11a9d265010e742fb4b69c6f35d4
+      sha256: 46991267dc6aa6539cb5966a3931b56067a1eb38680dc19d6c4d8e017114e4d1
       size: 98740
     version: 1.23.1
   original:
-    commit: 04451a2de42c21d690d55f8a6b77939dc911cf16
+    commit: 8a1591253734e1a716d2b0327e438f2bcb1c9890
     git: https://github.com/AshleyYakeley/haskell-src-exts.git
 snapshots:
 - completed:
-    sha256: 7b975b104cb3dbf0c297dfd01f936a4d2ee523241dd0b1ae960522b833fe3027
-    size: 714096
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/7.yaml
-  original: lts-22.7
+    sha256: 9444fadfa30b67a93080254d53872478c087592ad64443e47c546cdcd13149ae
+    size: 678857
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/23/0.yaml
+  original: lts-23.0
