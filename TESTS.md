@@ -776,6 +776,24 @@ data G x =
   MkG x
 ```
 
+Type role annotation
+
+```haskell
+type F :: Type -> Type
+type role F representational
+data F x =
+  MkF x
+```
+
+Type role annotation
+
+```haskell
+type G :: Type -> Type -> Type
+type role F representational phantom
+data G x y =
+  MkF x
+```
+
 Implicit parameters
 
 ```haskell
