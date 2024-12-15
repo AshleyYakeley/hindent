@@ -1543,6 +1543,11 @@ instance Pretty TyVarBind where
     pretty name
     write " :: "
     pretty ty
+  prettyInternal (ImplicitVar _ name) = braces $ pretty name
+  prettyInternal (ImplicitKindedVar _ name ty) = braces $ do
+    pretty name
+    write " :: "
+    pretty ty
 
 instance Pretty ModuleHead where
   prettyInternal (ModuleHead _ name mwarnings mexports) =
@@ -1860,6 +1865,26 @@ decl' :: Decl NodeInfo -> Printer ()
 --
 decl' (TypeSig _ names ty') = do
   mst <- fitsOnOneLine (depend (do commas (map prettyTopName names)
+                                   write " :: ")
+                               (declTy ty'))
+  case mst of
+    Nothing -> do
+      commas (map prettyTopName names)
+      indentSpaces <- getIndentSpaces
+      if allNamesLength >= indentSpaces
+        then do write " ::"
+                newline
+                indented indentSpaces (depend (write "   ") (declTy ty'))
+        else (depend (write " :: ") (declTy ty'))
+    Just st -> put st
+  where
+    nameLength (Ident _ s) = length s
+    nameLength (Symbol _ s) = length s + 2
+    allNamesLength = fromIntegral $ sum (map nameLength names) + 2 * (length names - 1)
+decl' (TypeKindSig _ names ty') = do
+  mst <- fitsOnOneLine (depend (do write "type"
+                                   space
+                                   commas (map prettyTopName names)
                                    write " :: ")
                                (declTy ty'))
   case mst of

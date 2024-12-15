@@ -776,6 +776,27 @@ data G x =
   MkG x
 ```
 
+Operator type sig
+
+```haskell
+(-->) :: Int -> Int -> Int
+p --> q = p + q
+```
+
+Operator type sig
+
+```haskell
+(-->) :: Int -> Int -> Int
+(-->) p q = p + q
+```
+
+Braced type parameters
+
+```haskell
+type (-->) :: forall {k}. (k -> Type) -> (k -> Type) -> Type
+type p --> q = Raised p q
+```
+
 Type role annotation
 
 ```haskell
