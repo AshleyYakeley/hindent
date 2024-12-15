@@ -1889,6 +1889,8 @@ decl' (TypeKindSig _ names ty') = do
                                (declTy ty'))
   case mst of
     Nothing -> do
+      write "type"
+      space
       commas (map prettyTopName names)
       indentSpaces <- getIndentSpaces
       if allNamesLength >= indentSpaces
